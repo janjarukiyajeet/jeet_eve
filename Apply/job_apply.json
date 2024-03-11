@@ -1,0 +1,58 @@
+[
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23807"},
+    "Email": "jaydeep@example.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23811"},
+    "Email": "etemp73541@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc2380e"},
+    "Email": "as@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23810"},
+    "Email": "etemp7354@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23813"},
+    "Email": "jkl@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23814"},
+    "Email": "sd@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc2380b"},
+    "Email": "eee@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc2380c"},
+    "Email": "yus@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc2380d"},
+    "Email": "dfdgfgdf@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc2380f"},
+    "Email": "sd@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23808"},
+    "Email": "deep@example.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23809"},
+    "Email": "er@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc2380a"},
+    "Email": "dec@gmail.com"
+  },
+  {
+    "_id": {"$oid": "65e9a894d5934000abc23812"},
+    "Email": "jkl@gmail.com"
+  }
+]
