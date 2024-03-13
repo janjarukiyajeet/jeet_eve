@@ -40,17 +40,13 @@ def send_otp_email(receiver_email, subject, body, otp):
     msg['Subject'] = subject
     msg.attach(MIMEText(body, 'plain'))
 
-    # Connect to the SMTP server
     server = smtplib.SMTP(smtp_server, smtp_port)
     server.starttls()
 
-    # Login to the Zoho Mail SMTP server
     server.login(smtp_username, smtp_password)
 
-    # Send the email
     server.sendmail(smtp_username, receiver_email, msg.as_string())
 
-    # Close the connection
     server.quit()
 
 def generate_reset_token(username):
@@ -98,7 +94,6 @@ def signup():
 
         reset_token = generate_reset_token(username)
 
-        # Call the /send_email endpoint with Zoho email details
         email_data = {
             'to_email': email,
             'subject': 'Password Reset Instructions',
@@ -229,11 +224,15 @@ def forgot_password():
 
 
 
-@app.route('/reset_password/<token>', methods=['POST'])
+@app.route('/reset_password', methods=['POST'])
 @csrf.exempt
-def reset_password(token):
+def reset_password():
     data = request.json
+    token = data.get('token')
     new_password = data.get('new_password')
+
+    if not token:
+        return jsonify({"error": "Reset token not provided"}), 400
 
     reset_token = db.reset_tokens.find_one({'token': token})
 
@@ -249,8 +248,6 @@ def reset_password(token):
             return jsonify({"error": "User not found"}), 404
     else:
         return jsonify({"error": "Invalid or expired reset token"}), 400
-
-
 
 
 if __name__ == '__main__':
