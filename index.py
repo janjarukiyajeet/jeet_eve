@@ -1,6 +1,8 @@
 import secrets
 import ssl
+from email.mime.multipart import MIMEMultipart
 
+import requests
 from flask import Flask, request, jsonify
 from flask_pymongo import PyMongo
 import random
@@ -11,13 +13,13 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from pymongo import MongoClient
 
-from mongo_conn import client
+
 
 app = Flask(__name__)
 CORS(app)
 
-client = MongoClient('mongodb+srv://jeetj:9FFVZMC6eU1qrson@jeetdb.trviwgp.mongodb.net/', ssl_cert_reqs=ssl.CERT_NONE)
-db = client['company']
+client = MongoClient('mongodb+srv://jeetj:9FFVZMC6eU1qrson@jeetdb.trviwgp.mongodb.net/', tlsAllowInvalidCertificates=True)
+db = client['info']
 
 
 app.config['SECRET_KEY'] = secrets.token_hex(16)
@@ -26,27 +28,40 @@ app.config['JWT_SECRET_KEY'] = 'dc6f8cf55952d4550b2a54a1a79b6398'
 csrf = CSRFProtect(app)
 
 def send_otp_email(receiver_email, subject, body, otp):
-    smtp_server = 'smtp.gmail.com'
+    # Zoho Mail SMTP Configuration
+    smtp_server = 'smtppro.zoho.in'
     smtp_port = 587
-    smtp_username = 'etemp7354@gmail.com'
-    smtp_password = 'fomx muls ofkf egdk'
+    smtp_username = 'jeet.j@buone.in'
+    smtp_password = 'atEFF0UMQ4mx'
 
-    sender_email = 'My_Email@gmail.com'
-
-    msg = MIMEText(body)
-    msg['Subject'] = subject
-    msg['From'] = sender_email
+    msg = MIMEMultipart()
+    msg['From'] = smtp_username
     msg['To'] = receiver_email
+    msg['Subject'] = subject
+    msg.attach(MIMEText(body, 'plain'))
 
-    with smtplib.SMTP(smtp_server, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_username, smtp_password)
-        server.sendmail(sender_email, [receiver_email], msg.as_string())
+    # Connect to the SMTP server
+    server = smtplib.SMTP(smtp_server, smtp_port)
+    server.starttls()
+
+    # Login to the Zoho Mail SMTP server
+    server.login(smtp_username, smtp_password)
+
+    # Send the email
+    server.sendmail(smtp_username, receiver_email, msg.as_string())
+
+    # Close the connection
+    server.quit()
+
+def generate_reset_token(username):
+    reset_token = secrets.token_urlsafe(32)
+    db.reset_tokens.insert_one({'user_username': username, 'token': reset_token})
+    return reset_token
 
 
-def send_welcome_email(receiver_email, username):
-    subject = 'Welcome to User Profile Management'
-    body = f'Hello {username},\n\nThank you for registering with User Profile Management. We are excited to have you on board!'
+def send_reset_email(receiver_email, reset_token):
+    subject = 'Password Reset Instructions'
+    body = f'Click the following link to reset your password: http://your-reset-url/{reset_token}'
     send_otp_email(receiver_email, subject, body, otp=None)
 
 
@@ -81,8 +96,15 @@ def signup():
 
         db.users.insert_one(new_user)
 
-        send_welcome_email(email, username)
+        reset_token = generate_reset_token(username)
 
+        # Call the /send_email endpoint with Zoho email details
+        email_data = {
+            'to_email': email,
+            'subject': 'Password Reset Instructions',
+            'message': f'Click the following link to reset your password: http://your-reset-url/{reset_token}'
+        }
+        requests.post('http://localhost:5000/send_email', json=email_data)
 
         csrf_token = generate_csrf()
 
@@ -91,7 +113,7 @@ def signup():
         return response, 200
 
     else:
-        return jsonify({"error": "Username, password, email, mobile and gender are required"}), 400
+        return jsonify({"error": "Username, password, email, mobile, and gender are required"}), 400
 
 
 @app.route('/login', methods=['POST'])
@@ -207,11 +229,10 @@ def forgot_password():
 
 
 
-@app.route('/reset_password', methods=['PUT'])
+@app.route('/reset_password/<token>', methods=['POST'])
 @csrf.exempt
-def reset_password():
+def reset_password(token):
     data = request.json
-    token = data.get('token')
     new_password = data.get('new_password')
 
     reset_token = db.reset_tokens.find_one({'token': token})
