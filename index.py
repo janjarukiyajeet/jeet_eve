@@ -57,7 +57,7 @@ def generate_reset_token(username):
 
 def send_reset_email(receiver_email, reset_token):
     subject = 'Password Reset Instructions'
-    body = f'Click the following link to reset your password: http://your-reset-url/{reset_token}'
+    body = f'Click the following link to reset your password: http://your-reset-url/    {reset_token}'
     send_otp_email(receiver_email, subject, body, otp=None)
 
 
