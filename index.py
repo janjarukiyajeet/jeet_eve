@@ -67,11 +67,16 @@ def signup():
     data = request.json
     username = data.get('username')
     password = data.get('password')
+    confirm_password = data.get('confirm_password')
     first_name = data.get('first_name')
     last_name = data.get('last_name')
     mobile = data.get('mobile')
     email = data.get('email')
     gender = data.get('gender')
+
+    if password != confirm_password:
+        return jsonify({"error": "Password and confirm password do not match"}), 400
+
 
     if username and password and first_name and last_name and email and mobile and gender:
         existing_user = db.users.find_one({'username': username})
@@ -82,6 +87,7 @@ def signup():
         new_user = {
             'username': username,
             'password': password,
+            'confirm_password': confirm_password,
             'first_name': first_name,
             'last_name': last_name,
             'email': email,
@@ -99,7 +105,7 @@ def signup():
             'subject': 'Password Reset Instructions',
             'message': f'Click the following link to reset your password: http://your-reset-url/    {reset_token}'
         }
-        requests.post('http://localhost:5000/send_email', json=email_data)
+        #requests.post('http://localhost:5000/send_email', json=email_data)
 
         csrf_token = generate_csrf()
 
