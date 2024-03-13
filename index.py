@@ -97,7 +97,7 @@ def signup():
         email_data = {
             'to_email': email,
             'subject': 'Password Reset Instructions',
-            'message': f'Click the following link to reset your password: http://your-reset-url/{reset_token}'
+            'message': f'Click the following link to reset your password: http://your-reset-url/    {reset_token}'
         }
         requests.post('http://localhost:5000/send_email', json=email_data)
 
