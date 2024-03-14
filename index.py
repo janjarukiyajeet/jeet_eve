@@ -256,7 +256,7 @@ def reset_password():
         else:
             return jsonify({"error": "User not found"}), 404
     else:
-        return jsonify({"error": "Invalid or expired reset token"}), 400
+        return jsonify({"error": "Invalid or expired reset token........"}), 400
 
 
 if __name__ == '__main__':
