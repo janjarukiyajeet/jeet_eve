@@ -81,8 +81,11 @@ def signup():
     if username and password and first_name and last_name and email and mobile and gender:
         existing_user = db.users.find_one({'username': username})
 
+
+
         if existing_user:
             return jsonify({"error": "Username already exists"}), 400
+
 
         new_user = {
             'username': username,
