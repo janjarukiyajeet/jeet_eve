@@ -1,16 +1,23 @@
 from flask import Flask, request, jsonify
 import json
+from bson import json_util
+from pymongo import MongoClient
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
+client = MongoClient('mongodb+srv://jeetj:9FFVZMC6eU1qrson@jeetdb.trviwgp.mongodb.net/', tlsAllowInvalidCertificates=True)
+db = client['jeet']
+collection = db['apply_data']
 
-@app.route('/show_data', methods=['get'])
+@app.route('/show_data', methods=['GET'])
 def show_data():
     try:
-        with open('job_apply.json', 'r') as file:
-            existing_data = json.load(file)
+        data = list(collection.find())
 
-        return jsonify(existing_data), 200
+        json_data = json_util.dumps(data)
+        return json_data, 200, {'Content-Type': 'application/json'}
 
     except FileNotFoundError:
         return jsonify({"message": "No data found"}), 404
@@ -20,44 +27,24 @@ def show_data():
 def store_data():
     data = request.get_json()
 
-    # Assuming data includes 'first_name', 'last_name', 'mobile', and 'email'
+
     first_name = data.get('firstName')
     last_name = data.get('lastName')
     mobile = data.get('phoneNumber')
     email = data.get('email')
+    job_title = data.get('jobTitle')
+    gender = data.get('gender')
 
-    # Read existing data from job_apply.json
-    try:
-        with open('job_apply.json', 'r') as file:
-            existing_data = json.load(file)
-    except FileNotFoundError:
-        existing_data = []
 
-    # Check if existing_data is a list or a dictionary
-    if isinstance(existing_data, list):
-        # Append the new data to the list
-        job_data = {
-            "firstName": first_name,
-            "lastName": last_name,
-            "phoneNumber": mobile,
-            "email": email
-        }
-        existing_data.append(job_data)
-    else:
-        # Create a new list with the existing data and the new data
-        existing_data = [
-            existing_data,
-            {
-                "firstName": first_name,
-                "lastName": last_name,
-                "phoneNumber": mobile,
-                "email": email
-            }
-        ]
-
-    # Write the updated data back to job_apply.json
-    with open('job_apply.json', 'w') as file:
-        json.dump(existing_data, file, indent=2)
+    job_data = {
+        "firstName": first_name,
+        "lastName": last_name,
+        "phoneNumber": mobile,
+        "email": email,
+        "jobTitle": job_title,
+        "gender": gender
+    }
+    collection.insert_one(job_data)
 
     return jsonify({"message": "Data stored successfully"}), 200
 
